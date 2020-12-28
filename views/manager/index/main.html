@@ -1,0 +1,164 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <title><{config_item('manager_title')}></title>
+    <link href="/public/H-ui/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+    <link href="/public/H-ui/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+    <link href="/public/H-ui/hui-iconfont/iconfont.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<div class="pd-20" style="padding-top:20px;">
+    <p class="f-20 text-success">欢迎<{$admin_data.username}></p>
+    <{if $is_install==1}><p class="f-14 text-success c-red"></p><{/if}>
+    <p class="f-14 text-success c-red"></p>
+    <table style="width: 49%; float: left;" class="table table-border table-bordered table-bg">
+        <thead>
+        <tr>
+            <th colspan="2" scope="col">系统信息</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td width="100">PHP版本 </td>
+            <td><{$php_version}></td>
+        </tr>
+        <tr>
+            <td>服务器解析引擎 </td>
+            <td><{$server_soft}></td>
+        </tr>
+        <tr>
+            <td>服务器上传限制</td>
+            <td><{$file_size}></td>
+        </tr>
+        <tr>
+            <td>服务器当前时间 </td>
+            <td><{date('Y-m-d H:i:s',time())}></td>
+        </tr>
+        <tr>
+            <td>服务器域名</td>
+            <td><{$http_host}></td>
+        </tr>
+        <tr>
+            <td>当前版本</td>
+            <td><{$local_version}></td>
+        </tr>
+        </tbody>
+    </table>
+    <table style="width: 49%; float: right;" class="table table-border table-bordered table-bg">
+        <thead>
+        <tr>
+            <th colspan="2" scope="col">基础统计</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td width="100">商家数量</td>
+            <td><a href="<{site_url('/manager/member/shop/index')}>"><{$count.member_shop-1}>家</a></td>
+        </tr>
+        <tr>
+            <td>注册用户</td>
+            <td><a href="<{site_url('/manager/member/user/index')}>"><{$count.member-1}>个</a></td>
+        </tr>
+        <tr>
+            <td>产品数量</td>
+            <td><a href="<{site_url('/manager/goods/goods/index')}>"><{$count.goods}>个</a></td>
+        </tr>
+        <tr>
+            <td>待审商品</td>
+            <td><a href="<{site_url('/manager/goods/goods/index?status=3')}>"><{$count.examine_goods}>个</a></td>
+        </tr>
+        <tr>
+            <td>库存预警</td>
+            <td><a href="<{site_url('/manager/goods/goods/index?goods_store_nums=1')}>"><{$count.goods_store_nums}>个</a></td>
+        </tr>
+        <tr>
+            <td>订单数量</td>
+            <td><a href="<{site_url('/manager/order/order/index')}>"><{$count.order}>个</a></td>
+        </tr>
+        <tr>
+            <td>未发货订单</td>
+            <td><a href="<{site_url('/manager/order/order/index?status=2')}>"><{$count.send_order}>个</a></td>
+        </tr>
+        <tr>
+            <td>退款申请</td>
+            <td><a href="<{site_url('/manager/order/refund_doc/pending')}>"><{$count.order_refund_doc}>个</a></td>
+        </tr>
+        </tbody>
+    </table>
+    <table class="tabl table-bg"></table>
+    <table class="table table-border table-bordered table-bg table-hover table-sort mt-20">
+        <thead>
+        <tr>
+            <th colspan="10" scope="col">最新订单</th>
+        </tr>
+        </thead>
+        <thead>
+        <tr class="text-c">
+            <th>订单号</th>
+            <th width="80">收货人</th>
+            <th width="50">支付状态</th>
+            <th width="60">订单状态</th>
+            <th width="110">打印</th>
+            <th width="70">配送方式</th>
+            <th width="70">支付方式</th>
+            <th width="70">用户名</th>
+            <th width="70">下单时间</th>
+            <th width="80">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <{foreach $list as $key}>
+        <tr class="text-c">
+            <td class="text-l"><{$key.order_no}></td>
+            <td class="text-l"><{$key.full_name}></td>
+            <td class="text-c">
+                <{if $key.payment_status==0}>
+                <span class="label label-warning radius">未支付</span>
+                <{elseif $key.payment_status==1}>
+                <span class="label label-success radius">已支付</span>
+                <{/if}>
+            </td>
+            <td class="text-c"><{get_order_status_text($key)}></td>
+            <td class="text-c">
+                <span class="label label-warning radius"><a target="_blank" style="color: #fff;" href="<{site_url("/manager/order/order/print_distribution/?order_id=<{$key.id}>")}>">配货单</a></span>
+                <span class="label label-success radius" style="cursor: pointer;" onClick="open_iframe('选择快递公司','<{site_url("/manager/order/order/print_express_select/?order_id=<{$key.id}>")}>')">快递单</span>
+            </td>
+            <td class="text-l"><{$delivery_list[$key.delivery_id].name}></td>
+            <td class="text-l">
+                <{if $key.payment_id==1}>
+                货到付款
+                <{else}>
+                <{$payment_list[$key.payment_id].name}>
+                <{/if}>
+            </td>
+            <td class="text-l"><{$key.username}></td>
+            <td class="text-l"><{date('Y-m-d H:i:s',$key.addtime)}></td>
+            <td class="f-14 td-manage">
+                <a style="text-decoration:none" class="ml-5" onClick="open_iframe('订单详情','<{site_url("/manager/order/order/view/<{$key.id}>")}>','100%')" href="javascript:;" title="订单详情"><i class="Hui-iconfont">&#xe665;</i></a>
+                <{if $key.status==1}>
+                <a style="text-decoration:none" class="ml-5" onClick="open_iframe('编辑改价','<{site_url("/manager/order/order/edit/<{$key.id}>")}>')" href="javascript:;" title="编辑改价"><i class="Hui-iconfont">&#xe6df;</i></a>
+                <{/if}>
+                <{if $search_where['is_del']==1}>
+                <a style="text-decoration:none" class="ml-5" onClick="data_del(this,'<{site_url('/manager/order/order/delete/')}>','<{$key.id}>')" href="javascript:;" title="彻底删除"><i class="Hui-iconfont">&#xe6e2;</i></a>
+                <{else}>
+                <a style="text-decoration:none" class="ml-5" onClick="data_del(this,'<{site_url('/manager/order/order/delete_recycle/')}>','<{$key.id}>')" href="javascript:;" title="删除到回收站"><i class="Hui-iconfont">&#xe6e2;</i></a>
+                <{/if}>
+            </td>
+        </tr>
+        <{/foreach}>
+        </tbody>
+    </table>
+</div>
+<script type="text/javascript" src="/public/js/jquery.js"></script>
+<script type="text/javascript" src="/public/js/layer/layer.js"></script>
+<script type="text/javascript" src="/public/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/public/js/form.js"></script>
+<script type="text/javascript" src="/public/H-ui/js/H-ui.js"></script>
+<script type="text/javascript" src="/public/H-ui/js/H-ui.admin.js"></script>
+</body>
+</html>

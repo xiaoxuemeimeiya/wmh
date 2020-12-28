@@ -1,0 +1,388 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="renderer" content="webkit|ie-comp|ie-stand">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+	<meta http-equiv="Cache-Control" content="no-siteapp" />
+	<title><{config_item('manager_title')}></title>
+	<link href="/public/H-ui/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+	<link href="/public/H-ui/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+	<link href="/public/H-ui/hui-iconfont/iconfont.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<div class="pd-20">
+	<div id="tab-system" class="HuiTab">
+		<div class="tabBar cl"><span>基本信息</span><span>收款记录</span><span>退款记录</span><span>发货记录</span><span>管理员备注</span><span>操作日志</span><span>用户备注</span></div>
+		<!--基本信息-->
+		<div class="tabCon">
+			<table class="table table-border table-bordered table-bg table-hover table-sort">
+				<thead>
+				<tr class="text-c">
+					<th>商品名称</th>
+					<th width="80">商品原价</th>
+					<th width="50">实际价格</th>
+					<th width="60">数量</th>
+					<th width="100">状态</th>
+				</tr>
+				</thead>
+				<tbody>
+				<{foreach $sku_list as $key}>
+				<tr class="text-c">
+					<td class="text-l">
+						<{$key.goods_name}>&nbsp;&nbsp;&nbsp;
+						<{foreach $key.sku_value as $sku}>
+						<{$sku.name}>:<{if $sku.type==1}><{$sku.value}><{else}><{$sku.note}><{/if}>
+						<{/foreach}>
+					</td>
+					<td class="text-l">￥<{$key.sku_market_price}></td>
+					<td class="text-l">￥<{$key.sku_sell_price_real}></td>
+					<td class="text-l"><{$key.sku_num}></td>
+					<td class="text-c">
+						<{if $key.is_refund==0}>
+						<{if $key.is_send==0}>
+						<span class="label label-warning radius">待发货</span>
+						<{elseif $key.is_send==1}>
+						<span class="label label-success radius">已发货</span>
+						<{/if}>
+						<{elseif $key.is_refund==1}>
+						<span class="label label-warning radius">退款中</span>
+						<{elseif $key.is_refund==2}>
+						<span class="label label-success radius">退款完成</span>
+						<{/if}>
+					</td>
+				</tr>
+				<{/foreach}>
+				</tbody>
+			</table>
+			<div style="width: 100%; margin-top: 20px;">
+				<li style="width: 30%; float: left; margin-right: 10px;">
+					<table class="table table-border table-bordered table-bg table-hover table-sort">
+						<thead>
+						<tr class="text-c">
+							<th colspan="2">订单费用</th>
+						</tr>
+						</thead>
+						<tr class="text-l">
+							<td width="100">商品总金额</td>
+							<td>￥<{$order_data.sku_price_real}></td>
+						</tr>
+						<tr class="text-l">
+							<td>优惠券/促销金额</td>
+							<td>￥<{$order_data.coupons_price}>/￥<{$order_data.promotion_price}></td>
+						</tr>
+						<tr class="text-l">
+							<td>增加或减少金额</td>
+							<td>￥<{$order_data.discount_price}></td>
+						</tr>
+						<tr class="text-l">
+							<td>订单总额</td>
+							<td>￥<{$order_data.order_price}></td>
+						</tr>
+						<tbody>
+						</tbody>
+					</table>
+				</li>
+
+				<li style="width: 30%; float: left; margin-right: 10px;">
+					<table class="table table-border table-bordered table-bg table-hover table-sort">
+						<thead>
+						<tr class="text-c">
+							<th colspan="2">其他信息</th>
+						</tr>
+						</thead>
+						<tr class="text-l">
+							<td width="100">订单号</td>
+							<td><{$order_data.order_no}></td>
+						</tr>
+						<tr class="text-l">
+							<td>下单用户</td>
+							<td><{$member_data.username}></td>
+						</tr>
+						<tr class="text-l">
+							<td>支付方式</td>
+							<td><{$payment_data.name}></td>
+						</tr>
+						<tbody>
+						</tbody>
+					</table>
+				</li>
+			</div>
+			<div class="row cl">
+				<div class="col-10 pd-20">
+					订单状态&nbsp;<span class="label label-warning radius"><{get_order_status_text($order_data)}></span>
+					<{if is_pay($order_data)}>
+					<button onClick="order_pay();" class="btn btn-primary radius" type="button">支付</button>
+					<{/if}>
+					<{if is_send($order_data)}>
+					<button onClick="order_send();" class="btn btn-primary radius" type="button">发货</button>
+					<{/if}>
+					<{if is_refund($order_data)}>
+					<button onClick="order_refund();" class="btn btn-primary radius" type="button">退款</button>
+					<{/if}>
+					<{if is_confirm($order_data)}>
+					<button onClick="order_confirm();" class="btn btn-primary radius" type="button">完成</button>
+					<{/if}>
+					<{if $order_data.status!=9}>
+					<button onClick="order_cancel()" class="btn btn-primary radius" type="button">作废</button>
+					<{/if}>
+				</div>
+			</div>
+		</div>
+		<!--收款记录-->
+		<div class="tabCon">
+			<table class="table table-border table-bordered table-bg table-hover table-sort">
+				<thead>
+				<tr class="text-c">
+					<th width="150">时间</th>
+					<th width="80">金额</th>
+					<th width="100">支付方式</th>
+					<th width="100">管理员</th>
+					<th>备注</th>
+				</tr>
+				</thead>
+				<tbody>
+				<{foreach $order_collection_doc_list as $key}>
+				<tr class="text-c">
+					<td class="text-l"><{date('Y-m-d H:i:s',$key.addtime)}></td>
+					<td class="text-l">￥<{$key.amount}></td>
+					<td class="text-c"><{$key.name}></td>
+					<td class="text-c"><{$key.admin_user}></td>
+					<td class="text-l"><{$key.note}></td>
+				</tr>
+				<{/foreach}>
+				</tbody>
+			</table>
+		</div>
+		<!--退款款记录-->
+		<div class="tabCon">
+			<table class="table table-border table-bordered table-bg table-hover table-sort">
+				<thead>
+				<tr class="text-c">
+					<th width="150">时间</th>
+					<th width="80">金额</th>
+					<th width="100">状态</th>
+					<th width="100">管理员</th>
+					<th>退款理由</th>
+					<th>退款流程</th>
+				</tr>
+				</thead>
+				<tbody>
+				<{foreach $order_refund_doc_list as $key}>
+				<tr class="text-c">
+					<td class="text-l"><{date('Y-m-d H:i:s',$key.addtime)}></td>
+					<td class="text-l">￥<{$key.amount}></td>
+					<td class="text-c">
+						<{if $key.status==0}>
+						退款中
+						<{elseif $key.status==1}>
+						退款拒绝
+						<{elseif $key.status==2}>
+						退款完成
+						<{/if}>
+					</td>
+					<td class="text-c"><{$key.admin_user}></td>
+					<td class="text-l"><{$key.note}></td>
+					<td class="text-l">
+						<{foreach $key.log as $k}>
+						<{date('Y-m-d H:i:s', $k.addtime)}> <{$k.admin_user}> <{$k.desc}><br>
+						<{/foreach}>
+					</td>
+				</tr>
+				<{/foreach}>
+				</tbody>
+			</table>
+		</div>
+		<!--发货记录-->
+		<div class="tabCon">
+			<table class="table table-border table-bordered table-bg table-hover table-sort">
+				<thead>
+				<tr class="text-c">
+					<th width="150">时间</th>
+					<th width="80">操作用户名</th>
+					<th width="100">物流公司</th>
+					<th width="100">物流单号</th>
+					<th>备注</th>
+				</tr>
+				</thead>
+				<tbody>
+				<{foreach $order_delivery_doc_list as $key}>
+				<tr class="text-c">
+					<td class="text-l"><{date('Y-m-d H:i:s', $key.addtime)}></td>
+					<td class="text-l"><{$key.admin_user}></td>
+					<td class="text-l"><{$key.name}></td>
+					<td class="text-l"><{$key.delivery_code}></td>
+					<td class="text-l"><{$key.note}></td>
+				</tr>
+				<{/foreach}>
+				</tbody>
+			</table>
+		</div>
+		<!--管理员备注-->
+		<div class="tabCon">
+			<form action="<{site_url('/manager/order/order/admin_desc')}>" method="post" class="form form-horizontal" id="admin_desc" enctype="multipart/form-data">
+				<input type="hidden" name="id" value="<{$order_data.id}>">
+				<div class="row cl">
+					<label class="form-label col-2"><span class="c-red">*</span>管理员备注：</label>
+					<div class="formControls col-6">
+						<textarea name="admin_desc" cols="" rows="" class="textarea"  placeholder="管理员备注" datatype="empty|*1-100" dragonfly="true" nullmsg="管理员备注！" onKeyUp="textarealength(this,100)"><{$order_data.admin_desc}></textarea>
+						<p class="textarea-numberbar"><em class="textarea-length">0</em>/100</p>
+					</div>
+				</div>
+				<div class="row cl">
+					<div class="col-10 col-offset-2">
+						<button onClick="$('#add').submit();" class="btn btn-primary radius" type="submit"><i class="Hui-iconfont">&#xe632;</i> 保存</button>
+						<button onClick="layer_close();" class="btn btn-default radius" type="button">&nbsp;&nbsp;取消&nbsp;&nbsp;</button>
+					</div>
+				</div>
+			</form>
+		</div>
+		<!--操作日志-->
+		<div class="tabCon">
+			<table class="table table-border table-bordered table-bg table-hover table-sort">
+				<thead>
+				<tr class="text-c">
+					<th width="150">时间</th>
+					<th width="80">操作用户名</th>
+					<th width="50">操作</th>
+					<th>备注</th>
+				</tr>
+				</thead>
+				<tbody>
+				<{foreach $order_log_list as $key}>
+				<tr class="text-c">
+					<td class="text-l"><{$key.addtime}></td>
+					<td class="text-l"><{$key.admin_user}></td>
+					<td class="text-l"><{$key.action}></td>
+					<td class="text-l"><{$key.note}></td>
+				</tr>
+				<{/foreach}>
+				</tbody>
+			</table>
+		</div>
+		<!--用户备注-->
+		<div class="tabCon">
+			<form class="form form-horizontal">
+				<div class="row cl">
+					<label class="form-label col-2"><span class="c-red">*</span>用户备注：</label>
+					<div class="formControls col-6">
+						<textarea class="textarea"><{$order_data.m_desc}></textarea>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+<script type="text/javascript" src="/public/js/jquery.js"></script>
+<script type="text/javascript" src="/public/js/validform.js"></script>
+<script type="text/javascript" src="/public/js/layer/layer.js"></script>
+<script type="text/javascript" src="/public/js/icheck/jquery.icheck.min.js"></script>
+<script type="text/javascript" src="/public/H-ui/js/H-ui.js"></script>
+<script type="text/javascript" src="/public/H-ui/js/H-ui.admin.js"></script>
+<script type="text/javascript">
+	$(function() {
+		//验证表单管理员备注
+		$.Tipmsg.r = null;
+		$("#admin_desc").Validform({
+			tiptype: function (msg) {
+				layer.msg(msg);
+			},
+			tipSweep: true,
+			ajaxPost: true,
+			callback: function (data) {
+				if (data.status == "y") {
+					window.location.reload();
+				}
+			}
+		});
+	})
+	//菜单切换
+	$(function(){
+		$('.skin-minimal input').iCheck({
+			checkboxClass: 'icheckbox-blue',
+			radioClass: 'iradio-blue',
+			increaseArea: '20%'
+		});
+		$.Huitab("#tab-system .tabBar span","#tab-system .tabCon","current","click","0");
+	});
+	//支付订单了
+	function order_pay(){
+		layer.prompt({
+			title: '输入备注完成支付',
+			formType: 2 //prompt风格，支持0-2
+		}, function(note){
+			//提交请求
+			$.ajax({
+				type:"POST",
+				url: "/manager/order/order/order_pay/<{$order_data.id}>",
+				data: "note="+note,
+				dataType:"json",
+				success: function(data){
+					if (data.status=='y') {
+						window.location.reload();
+					} else {
+						layer.msg(data.info);
+					}
+				}
+			});
+		});
+	}
+	//订单发货
+	function order_send(){
+		open_iframe('订单发货','<{site_url("/manager/order/order/order_send/<{$order_data.id}>")}>',600,350)
+	}
+
+	//订单退款
+	function order_refund(){
+		open_iframe('订单退款','<{site_url("/manager/order/order/refund/<{$order_data.id}>")}>',600,350)
+	}
+
+	//订单完成
+	function order_confirm(){
+		layer.prompt({
+			title: '输入备注确认订单',
+			formType: 2 //prompt风格，支持0-2
+		}, function(note){
+			//提交请求
+			$.ajax({
+				type:"POST",
+				url: "/manager/order/order/confirm/<{$order_data.id}>",
+				data: "note="+note,
+				dataType:"json",
+				success: function(data){
+					if (data.status=='y') {
+						window.location.reload();
+					} else {
+						layer.msg(data.info);
+					}
+				}
+			});
+		});
+	}
+
+	//订单作废
+	function order_cancel(){
+		layer.prompt({
+			title: '输入备注确认作废',
+			formType: 2 //prompt风格，支持0-2
+		}, function(note){
+			//提交请求
+			$.ajax({
+				type:"POST",
+				url: "/manager/order/order/order_cancel/<{$order_data.id}>",
+				data: "note="+note,
+				dataType:"json",
+				success: function(data){
+					if (data.status=='y') {
+						window.location.reload();
+					} else {
+						layer.msg(data.info);
+					}
+				}
+			});
+		});
+	}
+</script>
+</body>
+</html>

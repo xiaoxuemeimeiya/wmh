@@ -1,0 +1,124 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="renderer" content="webkit|ie-comp|ie-stand">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+	<meta http-equiv="Cache-Control" content="no-siteapp" />
+	<title><{config_item('manager_title')}></title>
+	<link href="/public/H-ui/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+	<link href="/public/H-ui/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+	<link href="/public/H-ui/hui-iconfont/iconfont.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<nav class="breadcrumb">
+	<i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 会员管理 <span class="c-gray en">&gt;</span> 会员提现列表 <a class="btn btn-success radius r mr-20" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a>
+</nav>
+<div class="pd-20" style="padding-top: 0px;">
+	<div class="text-c pt-20">
+		<form action="<{site_url('/manager/member/user_withdraw/')}>" method="post" class="form form-horizontal" id="search" name="search">
+			<input type="text" name="username" placeholder="用户名" style="width:150px" class="input-text">
+			<span class="select-box" style="width:150px">
+				<select name="status" class="select">
+					<option value="">选择状态</option>
+					<{foreach $status as $v=>$k}>
+					<option value="<{$v}>"><{$k}></option>
+					<{/foreach}>
+				</select>
+			</span>
+			<button class="btn btn-success" type="submit"><i class="Hui-iconfont">&#xe665;</i> 搜索</button>
+		</form>
+	</div>
+	<div class="mt-20">
+		<table class="table table-border table-bordered table-bg table-hover table-sort">
+			<thead>
+			<tr class="text-c">
+				<th width="40"><input name="" type="checkbox" value=""></th>
+				<th width="50">ID</th>
+				<th>会员名</th>
+				<th width="50">提现金额</th>
+				<th width="50">提现方式</th>
+				<th width="50">开户名</th>
+				<th width="170">提现账号</th>
+				<th width="80">提交时间</th>
+				<th width="80">处理时间</th>
+				<th width="140">操作</th>
+			</tr>
+			</thead>
+			<tbody>
+			<{foreach $list as $key}>
+			<tr class="text-c">
+				<td><input name="id[]" type="checkbox" value="<{$key.id}>"></td>
+				<td><{$key.id}></td>
+				<td class="text-l"><{$key.username}></td>
+				<td class="text-l">￥<{$key.amount}></td>
+				<td><{$type[$key.type]}></td>
+				<td class="text-l"><{$key.name}></td>
+				<td class="text-l">
+					<{if $key.type==1}>
+					银行:<{$key.bank_name}><br>
+					<{/if}>
+					账号:<{$key.pay_number}>
+				</td>
+				<td><{date('Y-m-d',$key.addtime)}></td>
+				<td><{if $key.endtime!=''}><{date('Y-m-d',$key.endtime)}><{/if}></td>
+				<td class="f-14 td-manage" style="line-height: 30px;">
+					<a style="text-decoration:none" class="ml-5" onClick="open_iframe('备注','<{site_url("/manager/member/user_withdraw/edit/<{$key.id}>")}>')" href="javascript:;" title="备注"><i class="Hui-iconfont">&#xe6df;</i></a>
+					<{if $key.status==0}>
+					<a href="javascript:;" onClick="update_status(<{$key.id}>,1)" class="btn btn-primary radius">审核通过</a>
+					<a href="javascript:;" onClick="update_status(<{$key.id}>,2)" class="btn btn-danger radius">拒绝并退还资金</a>
+					<a href="javascript:;" onClick="update_status(<{$key.id}>,3)" class="btn btn-danger radius">拒绝不退还资金</a>
+					<{else}>
+					<span class="label label-success radius"><{$status[$key.status]}></span>
+					<{/if}>
+				</td>
+			</tr>
+			<{/foreach}>
+			</tbody>
+		</table>
+	</div>
+</div>
+<!--分页-->
+<{page_view('page',$page_count,search_array_to_link($search_where))}>
+<script type="text/javascript" src="/public/js/jquery.js"></script>
+<script type="text/javascript" src="/public/js/layer/layer.js"></script>
+<script type="text/javascript" src="/public/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/public/js/form.js"></script>
+<script type="text/javascript" src="/public/H-ui/js/H-ui.js"></script>
+<script type="text/javascript" src="/public/H-ui/js/H-ui.admin.js"></script>
+<script language="JavaScript">
+	$(function(){
+		//表单回填
+		var formObj = new Form();
+		formObj.init(<{ch_json_encode($search_where)}>);
+	})
+
+	/*更新信息状态
+	 * @ids会员id 对象
+	 * @status 状态
+	 * */
+	function update_status(ids,status){
+		if(ids==''){
+			layer.msg('没有选择任何数据!');
+			return false;
+		}
+		layer.confirm('确认要执行吗？',function(index){
+			$.ajax({
+				type:"POST",
+				url: "<{site_url('/manager/member/user_withdraw/update_status')}>",
+				data:"id="+ids+"&status="+status,
+				dataType:"json",
+				success: function(data){
+					if(data.status!='y'){
+						layer.msg(data.info);
+					}else{
+						window.location.reload();
+					}
+				}
+			});
+		});
+	}
+</script>
+</body>
+</html>

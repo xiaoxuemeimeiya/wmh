@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title><{config_item('manager_title')}></title>
+    <link href="/public/H-ui/css/style.css" rel="stylesheet" type="text/css">
+    <link href="/public/H-ui/hui-iconfont/iconfont.css" rel="stylesheet" type="text/css">
+    <style>
+        .top_menu_right{margin-right:50px;}
+    </style>
+</head>
+<body>
+    <div class="top_header">
+        <div class="top_left">
+            <span><a href="<{site_url('/manager/welcome/main')}>" target="main"><{config_item('manager_title')}></a></span>
+        </div>
+        <div class="top_menu">
+            <{if $admin_data.role_id==0 || stripos($admin_data.role, 'system')!== false}>
+            <a class="top_menu_right" href="<{site_url('/manager/welcome/menu/system')}>" target="left"><i class="Hui-iconfont">&#xe61d;</i> 管理员</a>
+            <{/if}>
+            <{if $admin_data.role_id==0 || stripos($admin_data.role, 'member')!== false}>
+            <a class="top_menu_right" href="<{site_url('/manager/welcome/menu/member')}>" target="left"><i class="Hui-iconfont">&#xe60d;</i> 用户管理</a>&nbsp&nbsp
+            <{/if}>
+            <{if $admin_data.role_id==0 || stripos($admin_data.role, 'goods')!== false}>
+            <a class="top_menu_right" href="<{site_url('/manager/welcome/menu/goods')}>" target="left"><i class="Hui-iconfont">&#xe620;</i> 产品管理</a>&nbsp&nbsp
+            <{/if}>
+            <{if $admin_data.role_id==0 || stripos($admin_data.role, 'order')!== false}>
+            <a class="top_menu_right" href="<{site_url('/manager/welcome/menu/order')}>" target="left"><i class="Hui-iconfont">&#xe673;</i> 订单管理</a>&nbsp&nbsp
+            <{/if}>
+            <{if $admin_data.role_id==0 || stripos($admin_data.role, 'tool')!== false}>
+            <a class="top_menu_right" href="<{site_url('/manager/welcome/menu/tool')}>" target="left"><i class="Hui-iconfont">&#xe673;</i> 广告管理</a>&nbsp&nbsp
+            <{/if}>
+        </div>
+        <div class="top_right"><span>欢迎<{$admin_data.username}> <a href="<{site_url('/manager/login/loginout')}>">退出</a></span></div>
+        <div class="clear"></div>
+    </div>
+</body>
+</html>

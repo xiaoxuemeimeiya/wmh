@@ -1,0 +1,301 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="renderer" content="webkit|ie-comp|ie-stand">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+	<meta http-equiv="Cache-Control" content="no-siteapp" />
+	<title><{config_item('manager_title')}></title>
+	<link href="/public/H-ui/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+	<link href="/public/H-ui/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+	<link href="/public/H-ui/hui-iconfont/iconfont.css" rel="stylesheet" type="text/css">
+	<script type="text/javascript" src="/public/js/jquery.js"></script>
+	<script type="text/javascript" src="/public/js/validform.js"></script>
+	<script type="text/javascript" src="/public/js/layer/layer.js"></script>
+	<script type="text/javascript" src="/public/js/icheck/jquery.icheck.min.js"></script>
+	<script type="text/javascript" src="/public/H-ui/js/H-ui.js"></script>
+	<script type="text/javascript" src="/public/H-ui/js/H-ui.admin.js"></script>
+</head>
+<body>
+<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 系统管理 <span class="c-gray en">&gt;</span> 站点设置 <a class="btn btn-success radius r mr-20" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
+<div class="pd-20">
+	<form action="<{site_url('/manager/system/web_config/save')}>" method="post" class="form form-horizontal" id="save" enctype="multipart/form-data">
+		<div id="tab-system" class="HuiTab">
+			<div class="tabBar cl"><span>基本设置</span><span>显示设置</span><span>系统设置</span><span>微信设置</span><span>其他API设置</span><span>其他设置</span></div>
+			<!--基本设置-->
+			<div class="tabCon">
+				<div class="row cl">
+					<label class="form-label col-2"><span class="c-red">*</span>网站域名：</label>
+					<div class="formControls col-10">
+						<input type="text" name="website_domain" placeholder="网站域名" value="<{config_item('website_domain')}>" class="input-text" style="width: 450px;" datatype="url" nullmsg="网站域名不能为空" errormsg="域名格式错误">
+					</div>
+				</div>
+				<div class="row cl">
+					<label class="form-label col-2"><span class="c-red">*</span>网站名称：</label>
+					<div class="formControls col-10">
+						<input type="text" name="website_title" placeholder="控制在25个字、50个字节以内" value="<{config_item('website_title')}>" class="input-text" style="width: 450px;" datatype="*" nullmsg="网站名称不能为空">
+					</div>
+				</div>
+				<div class="row cl">
+					<label class="form-label col-2">网站logo：</label>
+					<div class="formControls col-3">
+						<a href="<{config_item('website_logo')}>" target="_blank"><img src="<{config_item('website_logo')}>" width="50" <{if config_item('website_logo')==''}>style="display: none;"<{/if}>></a>
+						<input type="hidden" value="<{config_item('website_logo')}>" name="website_logo">
+						<input type="file" name="website_logo_pic" id="website_logo_pic" onchange="upload_file(this);" style="width: 150px;">
+					</div>
+				</div>
+				<div class="row cl">
+					<label class="form-label col-2"><span class="c-red">*</span>关键词：</label>
+					<div class="formControls col-10">
+						<input type="text" name="website_keywords" placeholder="5个左右,8汉字以内,用英文,隔开" value="<{config_item('website_keywords')}>" class="input-text" style="width: 450px;" datatype="*" nullmsg="关键词不能为空">
+					</div>
+				</div>
+				<div class="row cl">
+					<label class="form-label col-2"><span class="c-red">*</span>描述：</label>
+					<div class="formControls col-10">
+						<input type="text" name="website_desc" placeholder="控制在80个汉字，160个字符以内" value="<{config_item('website_desc')}>" class="input-text" style="width: 450px;" datatype="*" nullmsg="描述不能为空">
+					</div>
+				</div>
+				<div class="row cl">
+					<label class="form-label col-2">备案号：</label>
+					<div class="formControls col-10">
+						<input type="text" name="website_icp" placeholder="粤ICP备00000000号" value="<{config_item('website_icp')}>" class="input-text" style="width: 450px;">
+					</div>
+				</div>
+			</div>
+			<!--显示设置-->
+			<div class="tabCon">
+				<div class="row cl">
+					<label class="form-label col-2"><span class="c-red">*</span>商品列表每页数量：</label>
+					<div class="formControls col-10">
+						<input type="text" name="goods_list_pagesize" placeholder="必须是大于0的整数" value="<{config_item('goods_list_pagesize')}>" class="input-text" style="width: 450px;" datatype="n" nullmsg="商品每页数量不能为空" errormsg="商品每页数量必须是大于0的整数">
+					</div>
+				</div>
+				<div class="row cl">
+					<label class="form-label col-2"><span class="c-red">*</span>商品列表排序条件：</label>
+					<div class="formControls col-10">
+						<{foreach config_item('goods_orderby_name') as $val=>$key}>
+						<div class="radio-box">
+							<input type="radio" id="goods_list_orderby-<{$val}>" name="goods_list_orderby" value="<{$val}>" <{if config_item('goods_list_orderby')==$val}>checked<{/if}>>
+							<label for="goods_list_orderby-<{$val}>"><{$key}></label>
+						</div>
+						<{/foreach}>
+					</div>
+				</div>
+				<div class="row cl">
+					<label class="form-label col-2"><span class="c-red">*</span>商品列表排序方式：</label>
+					<div class="formControls col-10">
+						<div class="radio-box">
+							<input type="radio" id="goods_list_orderby_type-0" name="goods_list_orderby_type" value="desc" <{if config_item('goods_list_orderby_type')=='desc'}>checked<{/if}>>
+							<label for="goods_list_orderby_type-0">倒序</label>
+						</div>
+						<div class="radio-box">
+							<input type="radio" id="goods_list_orderby_type-1" name="goods_list_orderby_type" value="asc" <{if config_item('goods_list_orderby_type')=='asc'}>checked<{/if}>>
+							<label for="goods_list_orderby_type-1">正序</label>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!--系统设置-->
+			<div class="tabCon">
+				<div class="row cl">
+					<label class="form-label col-2">缓存类型：</label>
+					<div class="formControls col-10">
+						<div class="radio-box">
+							<input type="radio" id="cache_type-0" name="cache_type" value="file" <{if config_item('cache_type')=='file'}>checked<{/if}>>
+							<label for="cache_type-0">文件缓存</label>
+						</div>
+						<div class="radio-box">
+							<input type="radio" id="cache_type-1" name="cache_type" value="memcached" <{if config_item('cache_type')=='memcached'}>checked<{/if}>>
+							<label for="cache_type-1">memcached</label>
+						</div>
+						<div class="radio-box">
+							<input type="radio" id="cache_type-2" name="cache_type" value="redis"<{if config_item('cache_type')=='redis'}>checked<{/if}>>
+							<label for="cache_type-2">redis</label>
+						</div>
+					</div>
+				</div>
+				<div class="row cl">
+					<label class="form-label col-2">分销模式：</label>
+					<div class="formControls col-10">
+						<div class="radio-box">
+							<input type="radio" id="share_type-0" name="share_type" value="0" <{if config_item('share_type')=='0'}>checked<{/if}>>
+							<label for="share_type-0">关闭</label>
+						</div>
+						<div class="radio-box">
+							<input type="radio" id="share_type-1" name="share_type" value="1" <{if config_item('share_type')=='1'}>checked<{/if}>>
+							<label for="share_type-1">一级</label>
+						</div>
+						<div class="radio-box">
+							<input type="radio" id="share_type-2" name="share_type" value="2"<{if config_item('share_type')=='2'}>checked<{/if}>>
+							<label for="share_type-2">两级</label>
+						</div>
+					</div>
+				</div>
+				<div class="row cl">
+					<label class="form-label col-2">一级分成比例：</label>
+					<div class="formControls col-10">
+						<input type="text" name="share_one_proportion" value="<{config_item('share_one_proportion')}>" class="input-text" style="width: 450px;" datatype="empty|n" errormsg="一级分成比例必须是1-99的数字">1-99的数字
+					</div>
+				</div>
+				<div class="row cl">
+					<label class="form-label col-2">二级分成比例：</label>
+					<div class="formControls col-10">
+						<input type="text" name="share_two_proportion" value="<{config_item('share_two_proportion')}>" class="input-text" style="width: 450px;" datatype="empty|n" errormsg="一级分成比例必须是1-99的数字">1-99的数字
+					</div>
+				</div>
+				<div class="row cl">
+					<label class="form-label col-2">分成发放模式：</label>
+					<div class="formControls col-10">
+						<div class="radio-box">
+							<input type="radio" id="share_price_type-0" name="share_price_type" value="balance" <{if config_item('share_price_type')=='balance'}>checked<{/if}>>
+							<label for="share_price_type-0">账户余额</label>
+						</div>
+						<div class="radio-box">
+							<input type="radio" id="share_price_type-1" name="share_price_type" value="redpack" <{if config_item('share_price_type')=='redpack'}>checked<{/if}>>
+							<label for="share_price_type-1">微信红包(必须开通微信支付的服务号)</label>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!--微信设置-->
+			<div class="tabCon">
+				<div class="row cl">
+					<label class="form-label col-2">APPID：</label>
+					<div class="formControls col-10">
+						<input type="text" name="wx_appid" value="<{config_item('wx_appid')}>" class="input-text" style="width: 450px;">
+					</div>
+				</div>
+				<div class="row cl">
+					<label class="form-label col-2">SECRET：</label>
+					<div class="formControls col-10">
+						<input type="text" name="wx_secret" value="<{config_item('wx_secret')}>" class="input-text" style="width: 450px;">
+					</div>
+				</div>
+				<div class="row cl">
+					<label class="form-label col-2">分销推荐模板消息ID：</label>
+					<div class="formControls col-10">
+						<input type="text" name="wx_flag_sms_tmp_id" value="<{config_item('wx_flag_sms_tmp_id')}>" class="input-text" style="width: 450px;">
+					</div>
+				</div>
+				<div class="row cl">
+					<label class="form-label col-2">用户返现模板消息ID：</label>
+					<div class="formControls col-10">
+						<input type="text" name="wx_cashback_sms_tmp_id" value="<{config_item('wx_cashback_sms_tmp_id')}>" class="input-text" style="width: 450px;">
+					</div>
+				</div>
+			</div>
+			<!--短信物流api设置-->
+			<div class="tabCon">
+				<div class="row cl">
+					<label class="form-label col-2">注册短信验证码：</label>
+					<div class="formControls col-10">
+						<div class="radio-box">
+							<input type="radio" id="sms_open-0" name="sms_open" value="2" <{if config_item('sms_open')=='2'}>checked<{/if}>>
+							<label for="sms_open-0">关闭</label>
+						</div>
+						<div class="radio-box">
+							<input type="radio" id="sms_open-1" name="sms_open" value="1"<{if config_item('sms_open')=='1'}>checked<{/if}>>
+							<label for="sms_open-1">开启</label>
+						</div>
+					</div>
+				</div>
+				<div class="row cl">
+					<label class="form-label col-2">短信APPKEY：</label>
+					<div class="formControls col-10">
+						<input type="text" name="sms_appkey" value="<{config_item('sms_appkey')}>" class="input-text" style="width: 450px;">
+					</div>
+				</div>
+				<div class="row cl">
+					<label class="form-label col-2">短信SERETKEY：</label>
+					<div class="formControls col-10">
+						<input type="text" name="sms_secret" value="<{config_item('sms_secret')}>" class="input-text" style="width: 450px;">
+					</div>
+				</div>
+				<div class="row cl">
+					<label class="form-label col-2">物流商户ID：</label>
+					<div class="formControls col-10">
+						<input type="text" name="delivery_appid" value="<{config_item('delivery_appid')}>" class="input-text" style="width: 450px;">
+					</div>
+				</div>
+				<div class="row cl">
+					<label class="form-label col-2">物流API Key：</label>
+					<div class="formControls col-10">
+						<input type="text" name="delivery_appkey" value="<{config_item('delivery_appkey')}>" class="input-text" style="width: 450px;">
+					</div>
+				</div>
+			</div>
+			<!--其他设置-->
+			<div class="tabCon">
+				<div class="row cl">
+					<label class="form-label col-2"><span class="c-red">*</span>订单自动确认时间：</label>
+					<div class="formControls col-10">
+						<input type="text" name="order_auto_confirm" value="<{config_item('order_auto_confirm')}>" class="input-text" style="width: 150px;" datatype="n" nullmsg="订单自动确认时间不能为空" errormsg="订单自动确认时间必须是大于0的整数">&nbsp;分钟 发货后的X分钟，会自动变为完成状态
+					</div>
+				</div>
+				<div class="row cl">
+					<label class="form-label col-2"><span class="c-red">*</span>订单自动取消时间：</label>
+					<div class="formControls col-10">
+						<input type="text" name="order_auto_cancel" value="<{config_item('order_auto_cancel')}>" class="input-text" style="width: 150px;" datatype="n" nullmsg="订单自动取消时间不能为空" errormsg="订单自动取消时间必须是大于0的整数">&nbsp;分钟 未付款订单生成X分钟后，会自动被取消掉
+					</div>
+				</div>
+				<div class="row cl">
+					<label class="form-label col-2"><span class="c-red">*</span>店铺结算手续费：</label>
+					<div class="formControls col-10">
+						<input type="text" name="shop_withdraw_commission" value="<{config_item('shop_withdraw_commission')}>" class="input-text" style="width: 150px;" datatype="n" nullmsg="店铺结算手续费不能为空" errormsg="店铺结算手续费必须是0-100的整数">&nbsp;%商家结算时，扣除的百分比，最终商家结算金额为：<应结算总额> - <应结算总额> * <商家结算手续费>
+					</div>
+				</div>
+				<div class="row cl">
+					<label class="form-label col-2"><span class="c-red">*</span>店铺库存预警数量：</label>
+					<div class="formControls col-10">
+						<input type="text" name="goods_store_nums" value="<{config_item('goods_store_nums')}>" class="input-text" style="width: 150px;" datatype="n" nullmsg="店铺库存预警数量不能为空" errormsg="店铺库存预警数量必须是整数">&nbsp;库存低于设置数量时预警
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row cl">
+			<div class="col-10 col-offset-2">
+				<button onClick="$('#add').submit();" class="btn btn-primary radius" type="submit"><i class="Hui-iconfont">&#xe632;</i> 保存</button>
+				<button onClick="layer_close();" class="btn btn-default radius" type="button">&nbsp;&nbsp;取消&nbsp;&nbsp;</button>
+			</div>
+		</div>
+	</form>
+</div>
+<{ajax_upload()}>
+<script type="text/javascript">
+	$(function() {
+		//验证表单
+		$.Tipmsg.r = null;
+		$("#save").Validform({
+			tiptype: function (msg) {
+				layer.msg(msg);
+			},
+			tipSweep: true,
+			ajaxPost: true,
+			callback: function (data) {
+				if (data.status == "y") {
+					window.location.reload();
+				}
+			}
+		});
+	})
+	//菜单切换
+	$(function(){
+		$('.skin-minimal input').iCheck({
+			checkboxClass: 'icheckbox-blue',
+			radioClass: 'iradio-blue',
+			increaseArea: '20%'
+		});
+		$.Huitab("#tab-system .tabBar span","#tab-system .tabCon","current","click","0");
+	});
+	//添加图片展示
+	function show_upload(spec_pic, url){
+		$("#"+spec_pic).parent().find('img').attr('src',url);
+		$("#"+spec_pic).parent().find('img').show();
+		$("#"+spec_pic).parent().find('a').attr('href',url);
+		$("#"+spec_pic).parent().find('[type="hidden"]').val(url);
+	}
+</script>
+</body>
+</html>

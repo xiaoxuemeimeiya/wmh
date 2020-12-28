@@ -1,0 +1,126 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+    <title><{config_item('manager_title')}></title>
+    <link href="/public/H-ui/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+    <link href="/public/H-ui/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+    <link href="/public/H-ui/hui-iconfont/iconfont.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<div class="pd-20">
+	<form action="<{site_url('/manager/system/role/save')}>" method="post" class="form form-horizontal" id="add">
+		<div class="row cl">
+			<label class="form-label col-2"><span class="c-red">*</span>角色名称：</label>
+			<div class="formControls col-5">
+				<input type="text" class="input-text" value="" name="name" datatype="*" nullmsg="请输入角色名称！">
+			</div>
+		</div>
+        <div class="row cl">
+            <label class="form-label col-2">角色权限：</label>
+            <div class="formControls col-10">
+                <{foreach $right_arr as $val=>$key}>
+                <dl class="permission-list">
+                    <dt>
+                        <label>
+                            <input type="checkbox" id='checkbox_<{$val}>' onclick='checkGroupAll(this,"<{$val}>");'>&nbsp;<{$val}>
+                        </label>
+                    </dt>
+                    <dd id='ul_<{$val}>' class='attr_list' alt="<{$val}>">
+                        <dl class="cl permission-list2">
+                            <dd>
+                                <{foreach $key as $v=>$k}>
+                                <label>
+                                    <input type="checkbox" value="<{$k.id}>" name='right[]' <{if strpos($item.rights,$k.right) !== false}>checked=checked<{/if}> onclick='checkItem("<{$val}>");' >&nbsp;<{$k.name}>
+                                </label>
+                                <{/foreach}>
+                            </dd>
+                        </dl>
+                     </dd>
+                </dl>
+                <{/foreach}>
+            </div>
+        </div>
+		<div class="row cl">
+			<div class="col-10 col-offset-2">
+                <input type="hidden" name="id" value="">
+				<button onClick="$('#add').submit();" class="btn btn-primary radius" type="submit"><i class="Hui-iconfont">&#xe632;</i> 保存</button>
+				<button onClick="layer_close();" class="btn btn-default radius" type="button">&nbsp;&nbsp;取消&nbsp;&nbsp;</button>
+			</div>
+		</div>
+	</form>
+</div>
+</div>
+<script type="text/javascript" src="/public/js/jquery.js"></script>
+<script type="text/javascript" src="/public/js/validform.js"></script>
+<script type="text/javascript" src="/public/js/layer/layer.js"></script>
+<script type="text/javascript" src="/public/js/form.js"></script>
+<script type="text/javascript" src="/public/js/artTemplate.js"></script>
+<script type="text/javascript" src="/public/H-ui/js/H-ui.js"></script>
+<script type="text/javascript" src="/public/H-ui/js/H-ui.admin.js"></script>
+<script type="text/javascript">
+    $(function(){
+        //验证表单
+        $.Tipmsg.r=null;
+        $("#add").Validform({
+            tiptype:function(msg){
+                layer.msg(msg);
+            },
+            tipSweep:true,
+            ajaxPost:true,
+            callback:function(data){
+                if(data.status=="y"){
+                    layer_close();
+                }
+            }
+        });
+    })
+
+    var formObj = new Form();
+    formObj.init(<{ch_json_encode($item)}>);
+
+    //分组权限全选
+    function checkGroupAll(obj,nameVal)
+    {
+        if(obj.checked == true)
+        {
+            $('#ul_'+nameVal+' [name="right[]"]').prop('checked',true);
+        }
+        else
+        {
+            $('#ul_'+nameVal+' [name="right[]"]').prop('checked',false);
+        }
+    }
+
+    //选择权限
+    function checkItem(nameVal)
+    {
+        var totalNum   = $('#ul_'+nameVal+' [name="right[]"]').length;
+        var checkedNum = $('#ul_'+nameVal+' [name="right[]"]:checked').length;
+
+        if(checkedNum >= totalNum)
+        {
+            $('#checkbox_'+nameVal).prop('checked',true);
+        }
+        else
+        {
+            $('#checkbox_'+nameVal).prop('checked',false);
+        }
+    }
+
+    //预选择复选框
+    jQuery(function(){
+        $('dd.attr_list[alt]').each(
+            function(i)
+            {
+                checkItem($(this).attr('alt'));
+            }
+        );
+    });
+</script>
+</body>
+</html>

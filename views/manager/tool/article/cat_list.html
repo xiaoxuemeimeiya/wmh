@@ -1,0 +1,61 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+	<title><{config_item('manager_title')}></title>
+	<link href="/public/H-ui/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+	<link href="/public/H-ui/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+	<link href="/public/H-ui/hui-iconfont/iconfont.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<nav class="breadcrumb">
+	<i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 文章管理 <span class="c-gray en">&gt;</span> 分类列表 <a class="btn btn-success radius r mr-20" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a>
+</nav>
+<div class="pd-20" style="padding-top: 0px;">
+	<div class="cl pd-5 bg-1 bk-gray mt-20"> <span class="l">
+		<a href="javascript:;" class="btn btn-primary radius" onclick="open_iframe('添加顶级分类','<{site_url('/manager/tool/article_cat/add')}>')"><i class="Hui-iconfont">&#xe600;</i> 添加顶级分类</a>
+	</span></div>
+	<div class="mt-20">
+		<table class="table table-border table-bordered table-bg table-hover table-sort">
+			<thead>
+				<tr class="text-c">
+					<th width="50">ID</th>
+					<th>分类名称</th>
+					<th width="60">排序</th>
+					<th width="120">操作</th>
+				</tr>
+			</thead>
+			<tbody>
+			<!--分类模板-->
+			<{function name=type level=0}>
+				<{foreach $data as $key}>
+				<tr class="text-c">
+					<td><{$key.id}></td>
+					<td class="text-l"><span style="margin-left: <{$level*15}>px;"></span><{$key.name}></td>
+					<td><{$key.sortnum}></td>
+					<td class="f-14 td-manage">
+						<a style="text-decoration:none" class="ml-5" onClick="open_iframe('添加子分类','<{site_url("/manager/tool/article_cat/add/<{$key.id}>")}>')" href="javascript:;" title="添加子分类"><i class="Hui-iconfont">&#xe600;</i></a>
+						<a style="text-decoration:none" class="ml-5" onClick="open_iframe('编辑','<{site_url("/manager/tool/article_cat/edit/<{$key.id}>")}>')" href="javascript:;" title="编辑"><i class="Hui-iconfont">&#xe6df;</i></a>
+						<a style="text-decoration:none" class="ml-5" onClick="data_del(this,'<{site_url('/manager/tool/article_cat/delete/')}>','<{$key.id}>')" href="javascript:;" title="删除"><i class="Hui-iconfont">&#xe6e2;</i></a>
+					</td>
+				</tr>
+				<{call name=type data=$key.down level=$level+1}>
+				<{/foreach}>
+			<{/function}>
+			<!--调用模板函数-->
+			<{call name=type data=$list}>
+			</tbody>
+		</table>
+	</div>
+</div>
+<script type="text/javascript" src="/public/js/jquery.js"></script>
+<script type="text/javascript" src="/public/js/layer/layer.js"></script>
+<script type="text/javascript" src="/public/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/public/H-ui/js/H-ui.js"></script>
+<script type="text/javascript" src="/public/H-ui/js/H-ui.admin.js"></script>
+</body>
+</html>

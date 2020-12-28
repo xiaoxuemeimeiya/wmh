@@ -1,0 +1,69 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="renderer" content="webkit|ie-comp|ie-stand">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+	<meta http-equiv="Cache-Control" content="no-siteapp" />
+	<title><{config_item('manager_title')}></title>
+	<link href="/public/H-ui/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+	<link href="/public/H-ui/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+	<link href="/public/H-ui/hui-iconfont/iconfont.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<nav class="breadcrumb">
+	<i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 订单管理 <span class="c-gray en">&gt;</span> 退款申请处理 <a class="btn btn-success radius r mr-20" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a>
+</nav>
+<div class="pd-20" style="padding-top: 0px;">
+	<div class="mt-20">
+		<table class="table table-border table-bordered table-bg table-hover table-sort">
+			<thead>
+			<tr class="text-c">
+				<th width="30"><input name="" type="checkbox" value=""></th>
+				<th width="50">ID</th>
+				<th width="60">订单号</th>
+				<th width="80">用户名</th>
+				<th width="80">金额</th>
+				<th width="120">时间</th>
+				<th>备注</th>
+				<th width="100">操作</th>
+			</tr>
+			</thead>
+			<tbody>
+			<{foreach $list as $key}>
+			<tr class="text-c">
+				<td><input name="id[]" type="checkbox" value="<{$key.id}>"></td>
+				<td><{$key.id}></td>
+				<td class="text-l" onclick="open_iframe('订单详情','<{site_url("/manager/order/order/view/<{$key.order_id}>")}>','100%')"><{$key.order_no}></td>
+				<td class="text-l"><{$key.username}></td>
+				<td class="text-l">￥<{$key.amount}></td>
+				<td class="text-c"><{date('Y-m-d H:i:s',$key.addtime)}></td>
+				<td class="text-l"><{$key.note}></td>
+				<td class="text-c">
+					<a style="text-decoration:none" class="ml-5" onClick="open_iframe('查看处理流程','<{site_url("/manager/order/refund_doc/refund_doc_log/<{$key.id}>")}>',600,450)" href="javascript:;" title="查看处理流程"><i class="Hui-iconfont">&#xe665;</i></a>&nbsp;
+					<a href="javascript:;" onClick="open_iframe('退款处理','<{site_url("/manager/order/refund_doc/refund_doc_view/<{$key.id}>")}>',600,450)" class="btn btn-danger radius">处理</a>
+				</td>
+			</tr>
+			<{/foreach}>
+			</tbody>
+		</table>
+	</div>
+</div>
+<!--分页-->
+<{page_view('page',$page_count,search_array_to_link($search_where))}>
+<script type="text/javascript" src="/public/js/jquery.js"></script>
+<script type="text/javascript" src="/public/js/layer/layer.js"></script>
+<script type="text/javascript" src="/public/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/public/js/form.js"></script>
+<script type="text/javascript" src="/public/H-ui/js/H-ui.js"></script>
+<script type="text/javascript" src="/public/H-ui/js/H-ui.admin.js"></script>
+<script language="JavaScript">
+	$(function(){
+		//表单回填
+		var formObj = new Form();
+		formObj.init(<{ch_json_encode($search_where)}>);
+	})
+</script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+    <title><{config_item('manager_title')}></title>
+    <link href="/public/H-ui/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+    <link href="/public/H-ui/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+    <link href="/public/H-ui/hui-iconfont/iconfont.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<div class="pd-20">
+	<form action="<{site_url('/manager/system/payment/save')}>" method="post" class="form form-horizontal" id="add">
+		<div class="row cl">
+			<label class="form-label col-3"><span class="c-red">*</span>支付名称：</label>
+			<div class="formControls col-7">
+				<input type="text" class="input-text" value="" name="name" datatype="*" nullmsg="请输入支付名称！">
+			</div>
+		</div>
+        <{foreach json_decode($item.config, true) as $val=>$key}>
+        <div class="row cl">
+            <label class="form-label col-3"><span class="c-red">*</span><{$key[0]}>：</label>
+            <div class="formControls col-7">
+                <input type="hidden" name="config_<{$val}>[]" value="<{$key[0]}>">
+                <input type="text" class="input-text" value="<{$key[1]}>" name="config_<{$val}>[]" datatype="*" nullmsg="请输入<{$key[0]}>！">
+            </div>
+        </div>
+        <{/foreach}>
+        <div class="row cl">
+            <label class="form-label col-3"><span class="c-red">*</span>客户端：</label>
+            <div class="formControls col-7 skin-minimal">
+                <div class="radio-box">
+                    <input type="radio" id="client_type-1" name="client_type" value="1" checked>
+                    <label for="client_type-1">PC端</label>
+                </div>
+                <div class="radio-box">
+                    <input type="radio" id="client_type-2" name="client_type" value="2">
+                    <label for="client_type-2">手机端</label>
+                </div>
+                <div class="radio-box">
+                    <input type="radio" id="client_type-3" name="client_type" value="3">
+                    <label for="client_type-3">通用</label>
+                </div>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-3"><span class="c-red">*</span>状态：</label>
+            <div class="formControls col-7 skin-minimal">
+                <div class="radio-box">
+                    <input type="radio" id="status-0" name="status" value="0" checked>
+                    <label for="status-0">开启</label>
+                </div>
+                <div class="radio-box">
+                    <input type="radio" id="status-1" name="status" value="1">
+                    <label for="status-1">关闭</label>
+                </div>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-3"><span class="c-red">*</span>排序：</label>
+            <div class="formControls col-7">
+                <input type="text" class="input-text" value="99" name="sortnum" datatype="*" nullmsg="请输入排序！" errormsg="排序只能是整数">
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-3"><span class="c-red">*</span>简介：</label>
+            <div class="formControls col-7">
+                <textarea name="desc" cols="" rows="" class="textarea"  placeholder="简介" datatype="empty|*1-100" dragonfly="true" nullmsg="简介不能为空！" onKeyUp="textarealength(this,100)"></textarea>
+                <p class="textarea-numberbar"><em class="textarea-length">0</em>/100</p>
+            </div>
+        </div>
+		<div class="row cl">
+			<div class="col-10 col-offset-3">
+                <input type="hidden" name="id" value="">
+				<button onClick="$('#add').submit();" class="btn btn-primary radius" type="submit"><i class="Hui-iconfont">&#xe632;</i> 保存</button>
+				<button onClick="layer_close();" class="btn btn-default radius" type="button">&nbsp;&nbsp;取消&nbsp;&nbsp;</button>
+			</div>
+		</div>
+	</form>
+</div>
+</div>
+<script type="text/javascript" src="/public/js/jquery.js"></script>
+<script type="text/javascript" src="/public/js/validform.js"></script>
+<script type="text/javascript" src="/public/js/layer/layer.js"></script>
+<script type="text/javascript" src="/public/js/form.js"></script>
+<script type="text/javascript" src="/public/H-ui/js/H-ui.js"></script>
+<script type="text/javascript" src="/public/H-ui/js/H-ui.admin.js"></script>
+<script type="text/javascript">
+    $(function(){
+        //验证表单
+        $.Tipmsg.r=null;
+        $("#add").Validform({
+            tiptype:function(msg){
+                layer.msg(msg);
+            },
+            tipSweep:true,
+            ajaxPost:true,
+            callback:function(data){
+                if(data.status=="y"){
+                    layer_close();
+                }
+            }
+        });
+        //表单回填
+        var formObj = new Form();
+        formObj.init(<{ch_json_encode($item)}>);
+    })
+</script>
+</body>
+</html>

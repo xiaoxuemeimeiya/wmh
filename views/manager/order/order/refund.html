@@ -1,0 +1,129 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="renderer" content="webkit|ie-comp|ie-stand">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+	<meta http-equiv="Cache-Control" content="no-siteapp" />
+	<title><{config_item('manager_title')}></title>
+	<link href="/public/H-ui/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+	<link href="/public/H-ui/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+	<link href="/public/H-ui/hui-iconfont/iconfont.css" rel="stylesheet" type="text/css">
+	<link href="/public/H-ui/css/style.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<div>
+	<form action="<{site_url('/manager/order/order/refund_save')}>" method="post" class="form form-horizontal" id="add" enctype="multipart/form-data">
+		<input type="hidden" name="id" value="<{$order_data.id}>">
+		<div class="row cl">
+			<label class="form-label col-3">订单号：</label>
+			<div class="formControls col-7">
+				<{$order_data.order_no}>
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-3">下单时间：</label>
+			<div class="formControls col-7">
+				<{date('Y-m-d H:i:s',$order_data.addtime)}>
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-3">商品付款金额：</label>
+			<div class="formControls col-7">
+				￥<{$order_data.sku_price_real}>
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-3">运费付款金额：</label>
+			<div class="formControls col-7">
+				￥<{$order_data.delivery_price_real}>
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-3">订单付款金额：</label>
+			<div class="formControls col-7">
+				￥<{$order_data.order_price}>
+			</div>
+		</div>
+		<{foreach $sku_list as $key}>
+		<div class="row cl">
+			<label class="form-label col-3"></label>
+			<div class="formControls col-7">
+				<input type="radio" value="<{$key.id}>" name="sku_id" onclick="set_amount('<{$key.sku_sell_price_real*$key.sku_num}>');"><{$key.goods_name}> ￥<{$key.sku_sell_price_real*$key.sku_num}>
+			</div>
+		</div>
+		<{/foreach}>
+		<div class="row cl">
+			<label class="form-label col-3"><span class="c-red">*</span>退款金额流向：</label>
+			<div class="formControls col-7 skin-minimal">
+				<div class="radio-box">
+					<input type="radio" id="channel-1" name="channel" value="1" checked>
+					<label for="channel-1">退款到用户余额</label>
+				</div>
+				<div class="radio-box">
+					<input type="radio" id="channel-2" name="channel" value="2">
+					<label for="channel-2">已通过其他方式退款</label>
+				</div>
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-3"><span class="c-red">*</span>退款金额：</label>
+			<div class="formControls col-7">
+				<input type="text" class="input-text" value="" name="amount" datatype="price" nullmsg="退款金额" style="width: 200px;">
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-3"><span class="c-red">*</span>备注：</label>
+			<div class="formControls col-7">
+				<textarea name="desc" cols="" rows="" class="textarea"  placeholder="管理员备注" dragonfly="true" onKeyUp="textarealength(this,100)" style="height: 60px;"></textarea>
+				<p class="textarea-numberbar"><em class="textarea-length">0</em>/100</p>
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-3"><span class="c-red">*</span>注：</label>
+			<div class="formControls col-7">
+				点击退款后，<退款商品的金额>将直接转入用户的网站余额中，如果需要返还运费,请直接修改金额
+			</div>
+		</div>
+		<div class="row cl">
+			<div class="col-10 col-offset-2">
+				<button onClick="$('#add').submit();" class="btn btn-primary radius" type="submit"><i class="Hui-iconfont">&#xe632;</i> 确认</button>
+				<button onClick="layer_close();" class="btn btn-default radius" type="button">&nbsp;&nbsp;取消&nbsp;&nbsp;</button>
+			</div>
+		</div>
+	</form>
+</div>
+</div>
+
+<script type="text/javascript" src="/public/js/jquery.js"></script>
+<script type="text/javascript" src="/public/js/validform.js"></script>
+<script type="text/javascript" src="/public/js/layer/layer.js"></script>
+<script type="text/javascript" src="/public/js/form.js"></script>
+<script type="text/javascript" src="/public/H-ui/js/H-ui.js"></script>
+<script type="text/javascript" src="/public/H-ui/js/H-ui.admin.js"></script>
+<script type="text/javascript">
+	$(function(){
+		//验证表单
+		$.Tipmsg.r=null;
+		$("#add").Validform({
+			tiptype:function(msg){
+				layer.msg(msg);
+			},
+			tipSweep:true,
+			ajaxPost:true,
+			callback:function(data){
+				if(data.status=="y"){
+					layer.msg('保存成功');
+					setTimeout('layer_close()',1500);
+				}
+			}
+		});
+	})
+
+	function set_amount(sku_sell_price_real){
+		$('[name="amount"]').val(sku_sell_price_real);
+	}
+</script>
+</body>
+</html>

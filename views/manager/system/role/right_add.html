@@ -1,0 +1,153 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+    <title><{config_item('manager_title')}></title>
+    <link href="/public/H-ui/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+    <link href="/public/H-ui/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+    <link href="/public/H-ui/hui-iconfont/iconfont.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<div class="pd-20">
+	<form action="<{site_url('/manager/system/role_right/save')}>" method="post" class="form form-horizontal" id="add">
+		<div class="row cl">
+			<label class="form-label col-2"><span class="c-red">*</span>权限名称：</label>
+			<div class="formControls col-5">
+				<input type="text" class="input-text" value="" name="name" datatype="*" nullmsg="请输入权限名称！">
+			</div>
+		</div>
+        <div class="row cl">
+            <label class="form-label col-2"><span class="c-red">*</span>权限码：</label>
+            <div class="formControls col-7">
+                <table class="table table-border table-bordered table-bg table-hover table-sort">
+                    <thead>
+                    <tr class="text-c">
+                        <th>权限码</th>
+                        <th width="50">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="right_list">
+                    <!--权限列表-->
+                    </tbody>
+                    <!--权限模板-->
+                    <script type='text/html' id='rightTemplate'>
+                        {{each}}
+                        <tr class="text-c">
+                            <td>
+                                <input type="text" class="input-text" value="{{$value}}" name="right[]" datatype="*" nullmsg="权限码不能为空！">
+                            </td>
+                            <td class="f-14">
+                                <a onclick="$(this).parent().parent().remove();"><i class="Hui-iconfont">&#xe609;</i></a>
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </script>
+                </table>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-2"><span class="c-red">*</span>添加权限码：</label>
+            <div class="formControls col-9">
+                <span class="select-box" style="width: 230px;">
+				<select name="file_name" class="select">
+                    <option value="">请选择</option>
+                    <{foreach $file_list as $key}>
+                    <option value="<{$key}>"><{$key}></option>
+                    <{/foreach}>
+                </select>
+				</span>
+                <span class="select-box" style="width: 220px;">
+				<select name="action_name" class="select">
+                </select>
+				</span>
+                <button class="btn btn-primary radius" type="button" onclick="add_right();"><i class="Hui-iconfont">&#xe600;</i> 添加</button>
+            </div>
+        </div>
+		<div class="row cl">
+			<div class="col-10 col-offset-2">
+                <input type="hidden" name="id" value="">
+                <input type="hidden" name="type" value="<{$type}>">
+				<button onClick="$('#add').submit();" class="btn btn-primary radius" type="submit"><i class="Hui-iconfont">&#xe632;</i> 保存</button>
+				<button onClick="layer_close();" class="btn btn-default radius" type="button">&nbsp;&nbsp;取消&nbsp;&nbsp;</button>
+			</div>
+		</div>
+	</form>
+</div>
+</div>
+<script type="text/javascript" src="/public/js/jquery.js"></script>
+<script type="text/javascript" src="/public/js/validform.js"></script>
+<script type="text/javascript" src="/public/js/layer/layer.js"></script>
+<script type="text/javascript" src="/public/js/form.js"></script>
+<script type="text/javascript" src="/public/js/artTemplate.js"></script>
+<script type="text/javascript" src="/public/H-ui/js/H-ui.js"></script>
+<script type="text/javascript" src="/public/H-ui/js/H-ui.admin.js"></script>
+<script type="text/javascript">
+    $(function(){
+        //验证表单
+        $.Tipmsg.r=null;
+        $("#add").Validform({
+            tiptype:function(msg){
+                layer.msg(msg);
+            },
+            tipSweep:true,
+            ajaxPost:true,
+            callback:function(data){
+                if(data.status=="y"){
+                    layer_close();
+                }
+            }
+        });
+
+        //根据文件列出action
+        $('[name="file_name"]').change(function(){
+            $.ajax({
+                type:"POST",
+                url: "<{site_url('/manager/system/role_right/list_action')}>",
+                data:"file_name="+$(this).val()+"&type=<{$type}>",
+                dataType:"json",
+                success: function(data){
+                    var option_html = '';
+                    for(action in data)
+                    {
+                        option_html = option_html+'<option value="'+data[action]+'">'+data[action]+'</option>';
+                    }
+                    $('[name="action_name"]').html(option_html);
+                }
+            });
+        });
+
+        //表单回填
+        var formObj = new Form();
+        formObj.init(<{ch_json_encode($item)}>);
+
+        <{if $item.right!=''}>
+            var right_data = <{ch_json_encode($item.right)}>;
+            add_right_tmp(right_data);
+        <{/if}>
+    })
+
+    //权限模板解析
+    function add_right_tmp(data){
+        var data = arguments[0] ? arguments[0] :'';
+        if(data=='')
+        {
+            data = [];
+        }
+        var html = template('rightTemplate', data);
+        $('#right_list').append(html);
+    }
+
+    //添加权限
+    function add_right()
+    {
+        var html = $('[name="file_name"]').val()+'/'+$('[name="action_name"]').val();
+        //var data = {"right_data":[html]};
+        add_right_tmp([html]);
+    }
+</script>
+</body>
+</html>

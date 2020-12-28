@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title><{config_item('manager_title')}></title>
+    <link href="/public/H-ui/css/style.css" rel="stylesheet" type="text/css">
+    <link href="/public/H-ui/hui-iconfont/iconfont.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="/public/js/jquery.js"></script>
+</head>
+<body class="left_menu_body">
+    <{foreach $menu_list as $val=>$key}>
+    <div class="left_menu">
+        <div class="left_menu_parent"><a><{$val}></a></div>
+        <div class="left_menu_down">
+            <{assign i 0}>
+            <{foreach $key as $v=>$k}>
+                <!--普通管理员-->
+                <{if stripos($admin_data.role, trim($k, '/manager'))!== false}>
+                <li class="<{if $i==0}>no_border_top<{/if}>">
+                    <a class='left_menu_a' target="main" href="<{site_url($k)}>"> <{$v}></a>
+                </li>
+                <{/if}>
+                <!--超级管理员-->
+                <{if $admin_data.role_id==0}>
+                <li class="<{if $i==0}>no_border_top<{/if}>">
+                    <a class='left_menu_a' target="main" href="<{site_url($k)}>"> <{$v}></a>
+                </li>
+                <{/if}>
+                <{assign i $i+1}>
+            <{/foreach}>
+        </div>
+    </div>
+    <{/foreach}>
+
+    <script type="application/javascript">
+        $(function() {
+            //左侧菜单收缩展开
+            $(".left_menu_parent").click(
+                function () {
+                    $(this).parent().find('.left_menu_down').toggle();
+                }
+            );
+
+            //删除没有下级栏目的菜单
+            $(".left_menu_down").each(
+                    function () {
+                        if($(this).children('li').length==0)
+                        {
+                            $(this).parent().remove();
+                        }
+                    }
+            );
+
+            $(".left_menu_a").click(function(){
+                $('.left_menu_a').removeClass('a-active');
+                $(this).addClass('a-active');
+            });
+        });
+    </script>
+</body>
+</html>
