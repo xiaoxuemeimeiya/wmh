@@ -33,7 +33,7 @@ class User extends CI_Controller
         );
         assign('search_where', $search_where);
         //搜索条件end
-       // $where_data['select'] = 'u.id,u.nickname,u.headimgurl,u.balance,u.scribe_time,m.phone,';
+       //$where_data['select'] = 'u.id,u.nickname,u.headimgurl,u.balance,u.scribe_time,m.phone,';
         $where_data['select'] = 'u.id,u.openid,u.nickname,u.headimgurl,u.balance,u.scribe_time,m.phone,k.nickname as top_nickname,k.headimgurl as top_headimgurl,f.position,f.name,f.mobile';
         $where_data['join']         = array(
             array('phone as m', 'm.m_id=u.id','left'),
@@ -493,7 +493,7 @@ class User extends CI_Controller
          $where_data['where']['o.share_uid'] = $m_id;
  
          //搜索条件end
-         $where_data['select'] = 'o.id,o.order_no,o.payment_status,o.status,o.addtime,o.paytime,m.nickname,k.name,f.rate,f.rake_id,convert(f.order_price/10000,decimal(10,2)) as order_price,convert(f.rake_price/10000,decimal(10,2)) as rake_price';
+         $where_data['select'] = 'o.id,o.order_no,o.payment_status,o.status,o.addtime,o.paytime,m.nickname,m.headimgurl,k.name,f.rate,f.rake_id,convert(f.order_price/10000,decimal(10,2)) as order_price,convert(f.rake_price/10000,decimal(10,2)) as rake_price';
          $where_data['join']   = array(
              array('user as m', 'o.m_id=m.id'),
              array('goods as k', 'o.good_id=k.id'),
@@ -554,12 +554,15 @@ class User extends CI_Controller
     public function invite_group_edit($id)
     {
         $where['id'] = $id;
+        $pagesize = 20;//分页大小
+        $page     = (int)$this->input->get_post('per_page');
+        $page <= 1 ? $page = 1 : $page = $page;//当前页数
         $select_data['select'] = 'a.id,a.name,a.position,a.mobile,a.username,a.password,a.sendtime,a.endtime,a.status,a.addtime,b.nickname,b.headimgurl';
         $card = $this->loop_model->get_where('card',$where);
         $where_data['join']   = array(
             array('user b', 'a.m_id=b.id'),
         );
-        $where_data['where']['b.top_id'] = $m_id;
+        $where_data['where']['b.top_id'] = $id;
         $card = $this->loop_model->get_list('card a',$where_data, $pagesize, $pagesize * ($page - 1), 'a.id desc');
         assign('list', $card);
         display('/member/user/invite.html');
@@ -617,4 +620,371 @@ class User extends CI_Controller
             error_json('提交方式错误');
         }
     }
+
+    //返佣列表
+    public function rate(){
+        $pagesize = 20;//分页大小
+        $page     = (int)$this->input->get('per_page');
+        $page <= 1 ? $page = 1 : $page = $page;//当前页数
+        //搜索条件start
+        $rake_id = $this->input->post_get('rake_id');
+        if (isset($rake_id) && $rake_id != '') {
+            $where_data['where']['u.rake_id'] = $rake_id;
+        }
+        $payment_status = $this->input->post_get('payment_status');
+        if (isset($payment_status) && $payment_status != '') {
+            $where_data['where']['u.payment_status'] = $payment_status;
+        }
+        //搜索条件starttime,endtime
+        $starttime = $this->input->post_get('starttime');
+        $endtime = $this->input->post_get('endtime');
+        if (isset($starttime) && $starttime != '') {
+            $where_data['where']['u.paytime >='] = strtotime($starttime);
+        }
+        if (isset($endtime) && $endtime != '') {
+            $where_data['where']['u.paytime <='] = strtotime($endtime);
+        }
+
+        //关键字
+        $keyword_where = $this->input->post_get('keyword_where');
+        $keyword       = $this->input->post_get('keyword');
+        if (!empty($keyword_where) && !empty($keyword)) $where_data['like'][$keyword_where] = $keyword;
+
+        $where_data['where']['u.share_uid >'] = 0;
+        $search_where = array(
+            'rake_id'   => $rake_id,
+            'payment_status'   => $payment_status,
+            'starttime' => $starttime,
+            'endtime' => $endtime,
+            'keyword_where'  => $keyword_where,
+            'keyword'        => $keyword,
+        );
+        assign('search_where', $search_where);
+        //搜索条件end
+        $where_data['join']         = array(
+            array('user as a', 'u.share_uid=a.id'),
+            array('order_rake as k', 'k.order_id=u.id'),
+            //array('order as o', 'k.order_id=o.id'),
+            array('user as b', 'u.m_id=b.id')
+        );
+        $where_data['select'] = 'u.*,a.nickname as top_nickname,a.headimgurl as top_headimgurl,k.rake_price,k.order_price,b.nickname,b.headimgurl';
+        //查到数据
+        //$list_data = $this->loop_model->get_list('cash as u', $where_data, $pagesize, $pagesize * ($page - 1), 'a.id desc','');//列表
+        $list_data = $this->loop_model->get_list('order as u', $where_data, $pagesize, $pagesize * ($page - 1), 'a.id desc','');//列表
+        assign('list', $list_data);
+        //开始分页start
+        $all_rows = $this->loop_model->get_list_num('order as u', $where_data);//所有数量
+        assign('page_count', ceil($all_rows / $pagesize));
+        display('/member/user/rate.html');
+    }
+/*
+    public function day_rate(){
+        $pagesize = 20;//分页大小
+        $page     = (int)$this->input->get('per_page');
+        $page <= 1 ? $page = 1 : $page = $page;//当前页数
+        //搜索条件start
+        $status = $this->input->post_get('type');
+        if (isset($status) && $status != '') {
+            $where_data['where'] = array('u.type' => $status);
+        }
+        //搜索条件starttime,endtime
+        $starttime = $this->input->post_get('starttime');
+        $endtime = $this->input->post_get('endtime');
+        if (isset($starttime) && $starttime != '') {
+            $where_data['where'] = array('u.addtime >=' => $starttime);
+        }
+        if (isset($endtime) && $endtime != '') {
+            $where_data['where'] = array('u.addtime <=' => $endtime);
+        }
+
+        $username = $this->input->post_get('a.username');
+        if (!empty($username)) $where_data['where']['a.username'] = $username;
+        $search_where = array(
+            'status'   => $status,
+            'starttime' => $starttime,
+            'endtime' => $endtime,
+            'username' => $username,
+        );
+        assign('search_where', $search_where);
+        //搜索条件end
+
+        $where_data['join']         = array(
+            array('user as a', 'u.m_id=a.id'),
+            array('order_rake as k', 'k.order_id=u.order_id'),
+            array('order as o', 'k.order_id=o.id'),
+        );
+        $where_data['select'] = 'sum(k.rake_price) as rake_price,sum(k.order_price) as order_price,a.nickname as top_nickname,a.headimgurl as top_headimgurl,u.*,o.payment_status';
+        //查到数据
+        $list_data = $this->loop_model->get_group_list('cash as u', $where_data, $pagesize, $pagesize * ($page - 1), 'a.id desc','u.m_id,u.date');//列表
+        assign('list', $list_data);
+        //开始分页start
+        $all_rows = $this->loop_model->get_list_num('cash as u', $where_data);//所有数量
+        assign('page_count', ceil($all_rows / $pagesize));
+        display('/member/user/day_rate.html');
+    }
+*/
+    public function day_rate(){
+        $pagesize = 20;//分页大小
+        $page     = (int)$this->input->get('per_page');
+        $page <= 1 ? $page = 1 : $page = $page;//当前页数
+        //搜索条件start
+        $status = $this->input->post_get('state');
+        if (isset($status) && $status != '') {
+            $where_data['where'] = array('u.state' => $status);
+        }
+        //搜索条件starttime,endtime
+        $time = $this->input->post_get('time');
+        if (isset($starttime) && $starttime != '') {
+            $where_data['where'] = array('u.date' => $time);
+        }
+
+        $username = $this->input->post_get('a.username');
+        if (!empty($username)) $where_data['where']['a.username'] = $username;
+        $search_where = array(
+            'status'   => $status,
+            'time' => $time,
+            'username' => $username,
+        );
+        assign('search_where', $search_where);
+        //搜索条件end
+        $where_data['where'] = array('u.type' => 2);
+
+        $where_data['join']         = array(
+            array('user as a', 'u.m_id=a.id'),
+        );
+        $where_data['select'] = 'a.nickname as nickname,a.headimgurl as headimgurl,u.*';
+        //查到数据
+/*
+        $list_data = $this->loop_model->get_group_list('cash as u', $where_data, $pagesize, $pagesize * ($page - 1), 'a.id desc','u.m_id,u.date');//列表
+        foreach($list_data as $k=>$v){
+            $where_detail['where'] = array('cash_id'=>$v['id']);
+            $detail = $this->loop_model->get_list('cash_log',$where_detail,1,0,'id desc');//未支付订单
+            $v['note'] = $detail[0]['note'];
+            $v['log_id'] = $detail[0]['id'];
+            $list_data[$k] = $v;
+        }
+*/
+        $list_date = $this->loop_model->get_group_list('cash', '', '', '', 'id asc','date');//列表
+        assign('list_date', $list_date);
+        //assign('list', $list_data);
+        //开始分页start
+        $all_rows = $this->loop_model->get_list_num('cash as u', $where_data);//所有数量
+        assign('page_count', ceil($all_rows / $pagesize));
+        display('/member/user/day_rate.html');
+    }
+
+
+    //批量返现(按订单返现)
+    public function reback_batch_order(){
+        $this->load->helpers('wechat_helper');
+        $id = $this->input->post('id', true);
+        $this->load->library('minipay/WxPayApi');
+        $this->load->library('minipay/WxPayJsApiPay');
+        $this->load->library('minipay/WxPayConfig');
+        $this->load->library('minipay/JsApiPay');
+        foreach($id as $v){
+            //查看是否满足未返现
+            $orderDetail = $this->loop_model->get_where('order',array('id'=>$v,'payment_status'=>1));//该订单已支付
+            if(!$orderDetail){
+                //记录
+                cash_log_insert('该返现不存在活不满足条件',$v,1);
+            }
+            //查看该用户推广者是否存在
+            $user = $this->loop_model->get_where('user',array('id'=>$orderDetail['share_uid']));
+            if(!$user){
+                //记录
+                cash_log_insert('该用户不存在',$v,1);//该推广者不存在
+            }
+            $openid = $user['openid'];
+            //$openid = '';
+            //$update_data['rake_id'] = 1;//已返佣
+            //$res = $this->loop_model->update_where('order', $update_data, ['id'=>$v['id']]);
+            $cash = $this->loop_model->get_where('order_rake', ['order_id'=>$orderDetail['id'],'state'=>1,'rake_id'=>0]);
+            $partner_trade_no = time().getRandChar(18);
+            $input = new \WxPayBizCash();
+            $input->SetPartner_trade_no($partner_trade_no);
+            $input->SetDesc('cash');
+            $input->SetAmount($cash['rake_price']/100);
+            //$input->SetAmount(101);
+            $input->SetCheck_name('NO_CHECK');
+            $input->SetOpenid($openid);
+            $config = new \WxPayConfig();
+            $order = \WxPayApi::transfers($config,$input);lyLog(var_export($order,true) , "cash" , true);
+            //获取该审核订单
+            $cash = $this->loop_model->get_where('cash',array('m_id'=>$orderDetail['share_uid'],'order_id'=>$orderDetail['id']));
+            $UpdataWhere['m_id'] = $orderDetail['share_uid'];
+            $UpdataWhere['order_id'] = $orderDetail['id'];
+            if($order["return_code"]=="SUCCESS" && $order['result_code']=='SUCCESS'){
+                $updateData['state'] = 1;//状态改为审核通过,已打现
+                $updateData['cashtime'] = time();
+                $res = $this->loop_model->update_where('cash', $updateData, $UpdataWhere);
+                $OrderRakeWhere['order_id'] = $orderDetail['id'];
+                $res1 = $this->loop_model->update_where('order_rake', ['rake_id'=>1,'ratetime'=>time()],$OrderRakeWhere );
+                $res1 = $this->loop_model->update_where('order', ['rake_id'=>1],['id'=>$orderDetail['id']] );
+                lyLog(var_export($res,true) , "res" , true);
+                if($res){
+                    cash_log_insert('提现成功，记录成功',$cash['id'],0);
+                }else{
+                    cash_log_insert('提现成功，记录失败',$cash['id'],0);
+                }
+                //error_json($order['err_code_des']);exit;
+            }else if(($order['return_code']=='FAIL') || ($order['result_code']=='FAIL')){lyLog(var_export(555,true) , "res" , true);
+                //打款失败
+                $reason = (empty($order['err_code_des'])?$order['return_msg']:$order['err_code_des']);
+                cash_log_insert($reason ,$cash['id'],1);
+                $updateData['cashtime'] = time();
+                $updateData['state'] = 1;//状态改为审核失败，提现失败
+                $res = $this->loop_model->update_where('cash', $updateData, $UpdataWhere);
+                //error_json($reason);exit;
+            }else{lyLog(var_export(444,true) , "res" , true);
+                //error_json('pay data error!');exit;
+                $updateData['cashtime'] = time();
+                $updateData['state'] = 1;//状态改为审核失败,提现失败
+                $res = $this->loop_model->update_where('cash', $updateData,$UpdataWhere);
+                cash_log_insert('提现失败，pay data error!' ,$cash['id'],1);
+            }
+        }
+        error_json('y');exit;
+    }
+
+
+    //批量返现
+    public function reback_batch(){
+        $this->load->helpers('wechat_helper');
+        $id = $this->input->post('id', true);var_dump($id);exit;
+        $this->load->library('minipay/WxPayApi');
+        $this->load->library('minipay/WxPayJsApiPay');
+        $this->load->library('minipay/WxPayConfig');
+        $this->load->library('minipay/JsApiPay');
+        foreach($id as $v){
+            //查看是否满足未返现
+            $cash = $this->loop_model->get_where('cash',array('id'=>$v,'state'=>0));//未支付订单
+            if(!$cash){
+                //记录
+                cash_log_insert('该返现不存在活不满足条件',$v,1);
+            }
+            //查看该用户是否存在
+            $user = $this->loop_model->get_where('user',array('id'=>$cash['m_id']));
+            if(!$user){
+                //记录
+                cash_log_insert('该用户不存在',$v,1);
+            }
+            $openid = $user['openid'];
+            //$openid = '';
+            //$update_data['rake_id'] = 1;//已返佣
+            //$res = $this->loop_model->update_where('order', $update_data, ['id'=>$v['id']]);
+            $partner_trade_no = time().getRandChar(18);
+            $input = new \WxPayBizCash();
+            $input->SetPartner_trade_no($partner_trade_no);
+            $input->SetDesc('cash');
+            $input->SetAmount($cash['cash']/100);
+            //$input->SetAmount(101);
+            $input->SetCheck_name('NO_CHECK');
+            $input->SetOpenid($openid);
+            $config = new \WxPayConfig();
+            $order = \WxPayApi::transfers($config,$input);lyLog(var_export($order,true) , "cash" , true);
+            if($order["return_code"]=="SUCCESS" && $order['result_code']=='SUCCESS'){
+                $UpdataWhere['id'] = $v;
+                $updateData['state'] = 1;//状态改为审核通过,已打现
+                $updateData['cashtime'] = time();
+                $res = $this->loop_model->update_where('cash', $updateData, ['id'=>$v]);
+                lyLog(var_export($res,true) , "res" , true);
+                if($res){
+                    cash_log_insert('提现成功，记录成功',$v,0);
+                }else{
+                    cash_log_insert('提现成功，记录失败',$v,0);
+                }
+                //error_json($order['err_code_des']);exit;
+            }else if(($order['return_code']=='FAIL') || ($order['result_code']=='FAIL')){lyLog(var_export(555,true) , "res" , true);
+                //打款失败
+                $reason = (empty($order['err_code_des'])?$order['return_msg']:$order['err_code_des']);
+                cash_log_insert($reason ,$v,1);
+                $updateData['cashtime'] = time();
+                $res = $this->loop_model->update_where('cash', $updateData, ['id'=>$v]);
+                //error_json($reason);exit;
+            }else{lyLog(var_export(444,true) , "res" , true);
+                //error_json('pay data error!');exit;
+                $updateData['cashtime'] = time();
+                $res = $this->loop_model->update_where('cash', $updateData, ['id'=>$v]);
+                cash_log_insert('提现失败，pay data error!' ,$v,1);
+            }
+        }
+        error_json('y');exit;
+    }
+
+    //审核提现
+    public function ajaxcheck(){
+        $postData = $this->request->post();
+        if(!isset($postData['type']) || empty($postData)){
+            $this->ResArr["code"] = "3";
+            $this->ResArr["msg"] = "参数缺失！";
+        }
+        if($postData['type'] == 2){
+            //审核成功
+            $datainfo =  Db::table('add_cash')->where('id',$postData['id'])->find();
+            if(!$datainfo){
+                $this->ResArr["code"] = "3";
+                $this->ResArr["msg"] = "该提现记录不存在！";
+                return json($this->ResArr);
+            }
+            if($datainfo["cash"] <= 0){
+                $this->ResArr["code"] = "3";
+                $this->ResArr["msg"] = "提现金额错误！";
+                return json($this->ResArr);
+            }
+            $userinfo = WeUser::where('id',$datainfo['uid'])->find();
+            if(!$userinfo){
+                $this->ResArr["code"] = "3";
+                $this->ResArr["msg"] = "用户不存在！";
+                return json($this->ResArr);
+            }
+            $openid = $userinfo['openid'];
+            //$total_fee = $info['cash']*100;
+            $total_fee = $datainfo["cash"]*100;
+            require_once Env::get('ROOT_PATH').'extend/wepay3.0.9/WxPay.Api.php';
+            require_once Env::get('ROOT_PATH').'extend/wepay3.0.9/WxPay.JsApiPay.php';
+            require_once Env::get('ROOT_PATH').'extend/wepay3.0.9/WxPay.Config.php';
+            $partner_trade_no = time().getRandChar(18);
+            $input = new \WxPayBizCash();
+            $input->SetPartner_trade_no($partner_trade_no);
+            $input->SetDesc('cash');
+            $input->SetAmount($total_fee);
+            $input->SetCheck_name('NO_CHECK');
+            $input->SetOpenid($openid);
+            $config = new \WxPayConfig();
+            $order = \WxPayApi::transfers($config,$input);
+            if($order["return_code"]=="SUCCESS" && $order['result_code']=='SUCCESS'){
+                lyLog(var_export($order,true) , "refund" , true);
+                $UpdataWhere['id'] = $postData['id'];
+                $updateData['status'] = 2;//状态改为审核通过
+                $res = Db::table('add_cash')->where($UpdataWhere)->update($updateData);
+            }else if(($order['return_code']=='FAIL') || ($order['result_code']=='FAIL')){
+                //退款失败
+                //原因
+                $reason = (empty($order['err_code_des'])?$order['return_msg']:$order['err_code_des']);
+                $this->ResArr['code'] = "2";
+                $this->ResArr['msg'] = $reason;
+            }
+            else{
+                $this->ResArr['code'] = "2";
+                $this->ResArr['msg'] = "pay data error!";
+            }
+        }elseif($postData['type'] == 3){
+            //审核失败
+            $res = AddCash::where('id',$postData['id'])->update(['status'=>$postData['type']]);
+            if($res){
+                $this->ResArr["code"] = "0";
+                $this->ResArr["msg"] = "提交成功！";
+            }else{
+                $this->ResArr["code"] = "3";
+                $this->ResArr["msg"] = "提交失败！";
+            }
+        }else{
+            $this->ResArr["code"] = "3";
+            $this->ResArr["msg"] = "选择方式错误！";
+        }
+
+        return json($this->ResArr);
+    }
+
 }

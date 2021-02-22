@@ -19,7 +19,8 @@ class MY_Controller extends CI_Controller {
         'api_mobile/user/info/free_card',
         'api_mobile/goods/index/adv',
         'api_mobile/goods/index/good',
-        'api_mobile/order/invite/order_detail'
+        'api_mobile/order/invite/order_detail',
+        'api_mobile/user/info/day_rate_log'
     ];
 	
 	public function __construct()

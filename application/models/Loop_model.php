@@ -287,6 +287,98 @@ class Loop_model extends CI_Model
     }
 
     /**
+     * 查询所有
+     * @param string $table 表名
+     * @param array $data 条件
+     * @return array
+     */
+    public function get_group_list($table, $data = array(), $limit = 0, $offset = 0, $orderby = 'id desc',$groupby='', $cache = '')
+    {
+        $is_cache = '';
+        $result = array();
+        //开启缓存
+        if($cache!='') {
+            $cache_name = md5('list'.$table.json_encode($data).$limit.$offset.$orderby);
+            $result = cache('get',$cache_name);
+            if (!empty($result)) {
+                $is_cache = 'in';
+                return $result;
+            }
+        }
+        if (empty($is_cache)) {
+            $this->db->from($table);
+            if (!empty($data)) {
+                foreach ($data as $val => $key) {
+                    switch ($val) {
+                        case 'join':
+                            if (!empty($key)) {
+                                foreach ($key as $k) {
+                                    $this->db->join($k[0], $k[1], $k[2]);
+                                }
+                            }
+                            break;
+                        case 'where_in':
+                            if (!empty($key)) {
+                                foreach ($key as $v=>$k) {
+                                    $this->db->where_in($v, $k);
+                                }
+                            }
+                            break;
+                        case 'or_where_in':
+                            if (!empty($key)) {
+                                foreach ($key as $v=>$k) {
+                                    $this->db->or_where_in($v, $k);
+                                }
+                            }
+                            break;
+                        case 'where_not_in':
+                            if (!empty($key)) {
+                                foreach ($key as $v=>$k) {
+                                    $this->db->where_not_in($v, $k);
+                                }
+                            }
+                            break;
+                        case 'or_where_not_in':
+                            if (!empty($key)) {
+                                foreach ($key as $v=>$k) {
+                                    $this->db->or_where_not_in($v, $k);
+                                }
+                            }
+                            break;
+                        case 'select':
+                            if (!empty($key)) $this->db->$val($key, FALSE);
+                            break;
+                        case 'sql':
+                            if (!empty($key)) $this->db->where($key);
+                            break;
+                        default:
+                            if (!empty($key)) $this->db->$val($key);
+                            break;//不满足以上条件直接调用
+                    }
+                }
+            }
+            //查询数量
+            if (!empty($limit)) {
+                $this->db->limit($limit, $offset);
+            }
+            //排序
+            if (!empty($orderby)) {
+                $this->db->order_by($orderby);
+            }
+            //分组
+            if (!empty($groupby)) {
+                $this->db->group_by($groupby);
+            }
+            $query = $this->db->get();
+            $result = $query->result_array();//echo $this->db->last_query();exit;
+            if($cache!='') {
+                cache('save', $cache_name, $result);
+            }
+        }
+        return $result;
+    }
+
+    /**
      * 查询所有数据总数
      * @param string $table 表名
      * @param array $data 条件

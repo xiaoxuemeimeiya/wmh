@@ -319,7 +319,7 @@ class Goods_model extends CI_Model
                     'store_nums'   => $data_post['store_nums'][$v],
                     'market_price' => price_format($data_post['market_price'][$v]),
                     'sell_price'   => price_format($data_post['sell_price'][$v]),
-                    'weight'       => $data_post['weight'][$v],
+                    //'weight'       => $data_post['weight'][$v],
                     'minimum'      => $data_post['minimum'][$v],
                 );
                 $sk       = array();

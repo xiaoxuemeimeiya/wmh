@@ -1,0 +1,165 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="renderer" content="webkit|ie-comp|ie-stand">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+	<meta http-equiv="Cache-Control" content="no-siteapp" />
+	<title><{config_item('manager_title')}></title>
+	<link href="/public/H-ui/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+	<link href="/public/H-ui/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+	<link href="/public/H-ui/hui-iconfont/iconfont.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<nav class="breadcrumb">
+	<i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 用户管理 <span class="c-gray en">&gt;</span> 返佣列表 <a class="btn btn-success radius r mr-20" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a>
+</nav>
+<div class="pd-20" style="padding-top: 0px;">
+	<div class="text-c pt-20">
+		<form action='<{site_url("/manager/member/user/day_rate>")}>' method="post" class="form form-horizontal" id="search" name="search">
+
+			<span class="select-box" style="width:150px">
+				<select name="state" class="select">
+					<option value="">返佣状态</option>
+					<option value="1">待返佣</option>
+					<option value="2">已返佣</option>
+				</select>
+			</span>
+			<span class="select-box" style="width:150px">
+				<select name="time" class="select">
+					<option value="">时间</option>
+					<{foreach $list_date as $v}>
+					<option value="<{$v.date}>"><{$v.date}></option>
+					<{/foreach}>
+				</select>
+			</span>
+			<span class="select-box" style="width:150px">
+				<select name="keyword_where" class="select">
+					<option value="m.username">用户名</option>
+				</select>
+			</span>
+			<input type="text" name="keyword" style="width:150px" class="input-text">
+			<button class="btn btn-success" type="submit"><i class="Hui-iconfont">&#xe665;</i> 搜索</button>
+			<button onclick="window.location.href='<{search_array_to_link($search_where)}>&export=1'" class="btn btn-primary" type="button"><i class="Hui-iconfont">&#xe640;</i> 导出</button>
+		</form>
+	</div>
+	<div class="cl pd-5 bg-1 bk-gray mt-20"> <span class="l">
+		<a href="<{site_url('/manager/user/rate/')}>" class="btn btn-primary radius"><i class="Hui-iconfont">&#xe678;</i> 返回列表</a>
+		<a href="javascript:;" onclick="data_del(this,'<{site_url('/manager/member/user/reback_batch/')}>')" class="btn btn-danger radius"><i class="Hui-iconfont">&#xe60b;</i> 批量返现</a>
+	</span></div>
+	<div class="mt-20">
+		<table class="table table-border table-bordered table-bg table-hover table-sort">
+			<thead>
+			<tr class="text-c">
+				<th width="40"><input name="" type="checkbox" value=""></th>
+				<th width="50">ID</th>
+				<th width="100">用户昵称</th>
+				<th width="80">用户头像</th>
+				<th width="50">返佣金额</th>
+				<th width="50">返佣状态</th>
+				<th width="80">结算时间</th>
+				<th width="80">返佣时间</th>
+				<th width="150">备注</th>
+				<th width="50">操作</th>
+			</tr>
+			</thead>
+			<tbody>
+			<{foreach $list as $key}>
+			<tr class="text-c">
+				<td><input name="id[]" type="checkbox" value="<{$key.id}>"></td>
+				<td><{$key.id}></td>
+				<td><{$key.nickname}></td>
+				<td><img style="width:40px;height:40px;border-radius:40px" src="<{$key.headimgurl}>" /></td>
+				<td><{$key.cash/10000}></td>
+				<td class="text-c">
+					<{if $key.state==0}>
+					<span class="label label-warning radius">待返佣</span>
+					<{elseif $key.state==1}>
+					<span class="label label-success radius">已返佣</span>
+					<{elseif $key.state==2}>
+					<span class="label label-success radius">超出返佣</span>
+					<{/if}>
+				</td>
+				<td><{$key.date}></td>
+				<td><{if $key.cashtime}> <{date('Y-m-d H:i:s',$key.cashtime)}><{else}> <{/if}></td>
+				<td><{$key.note}></td>
+				<td class="f-14 td-manage">
+					<{if $key.state !=1}>
+					<a style="text-decoration:none" class="ml-5" onClick="open_iframe('返现','<{site_url("/manager/member/user/reback_rate/<{$key.id}>")}>','100%')" href="javascript:;" title="返现"><i class="Hui-iconfont">&#xe6df;</i></a>
+					<{/if}>
+				</td>
+			</tr>
+			<{/foreach}>
+			</tbody>
+		</table>
+	</div>
+</div>
+<!--分页-->
+<{page_view('page',$page_count,search_array_to_link($search_where))}>
+<script type="text/javascript" src="/public/js/jquery.js"></script>
+<script type="text/javascript" src="/public/js/layer/layer.js"></script>
+<script type="text/javascript" src="/public/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/public/js/form.js"></script>
+<script type="text/javascript" src="/public/H-ui/js/H-ui.js"></script>
+<script type="text/javascript" src="/public/H-ui/js/H-ui.admin.js"></script>
+<script language="JavaScript">
+	$(function(){
+		//表单回填
+		var formObj = new Form();
+		formObj.init(<{ch_json_encode($search_where)}>);
+	})
+
+	/*批量返现
+ * @obj 对象
+ * @url 连接地址
+ * */
+	function cash_reback_batch(obj,url,ids){
+		var ids = arguments[2] ? arguments[2] :'';
+		if(ids=='')
+		{
+			//是否是批量返现
+			var ids = new Array();
+			$('[name="id[]"]:checked').each(
+					function(i){
+						//获取多选框的值
+						var idVal = $('[name="id[]"]:checked:eq('+i+')').val();
+						ids.push(idVal);
+					}
+			)
+		}
+		if(ids==''){
+			layer.msg('没有选择任何数据!');
+			return false;
+		}
+		layer.confirm('确认要执行吗？',function(index){
+			$.ajax({
+				type:"POST",
+				url: url,
+				data:{'id':ids},
+				dataType:"json",
+				success: function(data){
+					if(data.status=='y'){
+						if($.isArray(ids))
+						{
+							//批量删除的刷新页面
+							window.location.reload();
+							layer.msg('操作成功!');
+						}
+						else
+						{
+							$(obj).parents("tr").remove();
+							layer.msg('操作成功!');
+						}
+					}
+					else
+					{
+						layer.msg(data.info);
+					}
+				}
+			});
+		});
+	}
+</script>
+</body>
+</html>
