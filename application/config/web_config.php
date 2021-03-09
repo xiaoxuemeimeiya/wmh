@@ -1,6 +1,6 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
-$config['website_domain'] = 'http://quan.huiyunzhi.cn/';
+$config['website_domain'] = 'http://wmh.samen360.com/';
 $config['website_title'] = '商城系统';
 $config['website_logo'] = '';
 $config['website_keywords'] = '商城系统';
@@ -16,8 +16,8 @@ $config['share_two_proportion'] = '5';
 $config['share_price_type'] = 'balance';
 $config['wx_appid'] = 'wx06a15a3cfbd766e5';
 $config['wx_secret'] = '419de876cb7765a8b8564ec20b030eef';
-$config['miniApp_appid'] = 'wxf28f2dee964dacb7';
-$config['miniApp_secret'] = '0631d0ae6c996d47965a59f2ba30f5f6';
+$config['miniApp_appid'] = 'wxcb13a2005c44db63';
+$config['miniApp_secret'] = '389b61cddaf310b81ba6924517fe4904';
 $config['wx_flag_sms_tmp_id'] = '';
 $config['wx_cashback_sms_tmp_id'] = '';
 $config['sms_open'] = '2';
