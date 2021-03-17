@@ -29,7 +29,7 @@ class WxPayConfig extends WxPayConfigInterface
 	 */
 	public function GetAppId()
 	{
-		return 'wxff5bc8dc04497e1c';
+		return 'wxb2574206f6344b83';
 	}
 	public function GetMerchantId()
 	{
@@ -93,7 +93,7 @@ class WxPayConfig extends WxPayConfigInterface
 	}
 	public function GetAppSecret()
 	{
-		return 'f03b2e904921ac34e796ebe5b223f13e';
+		return '50a2d26793bf233be6b17146e98f9aaf';
 	}
 
 
